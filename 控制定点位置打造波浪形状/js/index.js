@@ -17,20 +17,20 @@ function initScene() {
 
 function initCamera() {
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 500);
-    camera.position.set(50, 50, 50);
+    camera.position.set(1, 1, 1);
     camera.lookAt(0, 0, 0);
 };
 
 function initRender() {
     renderer = new THREE.WebGLRenderer({
         antialias: true,
-        // alpha: true,
+        alpha: true,
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    // renderer.shadowMap.enabled = true;
-    // renderer.outputEncoding = THREE.sRGBEncoding;
-    // renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    // renderer.toneMappingExposure = 1;
+    renderer.shadowMap.enabled = true;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1;
     renderer.setClearColor('#add8e6', 1);
     document.body.appendChild(renderer.domElement);
 };
@@ -51,9 +51,11 @@ function initContent() {
     const rawShaderMaterial = new THREE.RawShaderMaterial({
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
+        // wireFrame:true
+        side:THREE.DoubleSide
     });
 
-    const planeGeometry = new THREE.PlaneBufferGeometry(20, 20, 80, 80);
+    const planeGeometry = new THREE.PlaneBufferGeometry(1, 1, 64, 64);
 
     const plane = new THREE.Mesh(planeGeometry, rawShaderMaterial);
     scene.add(plane);
