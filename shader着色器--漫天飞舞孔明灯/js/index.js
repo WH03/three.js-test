@@ -12,6 +12,7 @@ import {
     DRACOLoader
 } from 'three/addons/loaders/DRACOLoader.js';
 
+// import gsap from 'gsap/esm/index.js'
 
 import {
     EffectComposer
@@ -53,7 +54,8 @@ function initScene() {
 
 function initCamera() {
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 500);
-    camera.position.set(10, 10, 10);
+    // camera.position.set(10, 10, 10);
+    camera.position.set(1, 1, 1);
     camera.lookAt(0, 0, 0);
 };
 
@@ -93,8 +95,6 @@ function initContent() {
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
         side: THREE.DoubleSide,
-        // uniforms: {}
-        transparent: true,
     });
 
 
@@ -107,55 +107,30 @@ function initContent() {
         scene.environment = texture;
     });
 
-    // // 加载gltf模型
-    // gltfLoader = new GLTFLoader();
-    // let lightBox = null;
-    // gltfLoader.load('model/flyLight.glb', (gltf) => {
-    //     gltf.scene.scale.set(0.2, 0.2, 0.2);
-    //     console.log('gltf.scene.children[1]:', gltf.scene.children[1]);
-
-    // lightBox = gltf.scene.children;
-    // lightBox.material = shaderMaterial;
-
-    // gltf.scene.traverse((child) => {
-    //     child.material = shaderMaterial;
-    // })
-    // scene.add(gltf.scene);
-
-    // })
-
     // 加载gltf模型
     gltfLoader = new GLTFLoader();
-    // const dracoLoader = new DRACOLoader();
-
-    // // dracoLoader.setDecoderPath('three/addons/libs/draco');
-    // dracoLoader.setDecoderPath('../three.js-dev-143/examples/jsm//libs/draco');
-
-    // gltfLoader.setDRACOLoader(dracoLoader);
-
     let lightBox = null;
-    // gltfLoader.load('model/flyLight.glb', (gltf) => {
-    // gltfLoader.load('model/lb1.glb', (gltf) => {
-    gltfLoader.load('model/lb1.glb', (gltf) => {
-        gltf.scene.scale.set(0.1, 0.1, 0.1);
-        // console.log('gltf.scene.children[1]:', gltf.scene.children[1]);
+    gltfLoader.load('model/flyLight.glb', (gltf) => {
+        // gltf.scene.scale.set(0.2, 0.2, 0.2);
+        console.log('gltf.scene.children[1]:', gltf.scene.children[1]);
 
-        // gltf.scene.castShadow = true;
-        // gltf.scene.receiveShadow = true;
-
-        lightBox = gltf.scene.children;
+        lightBox = gltf.scene.children[1];
         lightBox.material = shaderMaterial;
 
-        gltf.scene.traverse((child) => {
-            child.material = shaderMaterial;
-        });
-        scene.add(gltf.scene);
-    })
+        // 克隆
+        for (let i = 0; i < 150; i++) {
+            let flyLight = gltf.scene.clone(true);
+            let x = (Math.random() - 0.5) * 300;
+            let y = Math.random() * 60 + 25;
+            let z = (Math.random() - 0.5) * 300;
+
+            flyLight.position.set(x, y, z);
+            scene.add(flyLight);
+        }
 
 
 
-
-
+    });
 
 };
 
