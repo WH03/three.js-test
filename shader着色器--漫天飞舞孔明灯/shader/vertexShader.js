@@ -1,4 +1,4 @@
-let vertexShader = /*glsl*/`
+let vertexShader = `
 precision mediump float;
 varying vec4 v_vPosition;
 varying vec4 v_gPosition;

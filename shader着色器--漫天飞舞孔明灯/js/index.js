@@ -8,35 +8,13 @@ import {
 import {
     GLTFLoader
 } from 'three/addons/loaders/GLTFLoader.js'
-import {
-    DRACOLoader
-} from 'three/addons/loaders/DRACOLoader.js';
+import gsap from '../../gsap/esm/index.js';
+console.log(111, gsap);
 
-// import gsap from 'gsap/esm/index.js'
-
-import {
-    EffectComposer
-} from 'three/addons/postprocessing/EffectComposer.js';
-import {
-    RenderPass
-} from 'three/addons/postprocessing/RenderPass.js';
-import {
-    ShaderPass
-} from 'three/addons/postprocessing/ShaderPass.js';
-import {
-    OutlinePass
-} from 'three/addons/postprocessing/OutlinePass.js';
-import {
-    FXAAShader
-} from 'three/addons/shaders/FXAAShader.js';
 
 // 引入着色器变量
 import vertexShader from '../shader/vertexShader.js'
 import fragmentShader from '../shader/fragmentShader.js'
-
-
-// console.log('vertexShader:',vertexShader)
-// console.log('fragmentShader:',fragmentShader)
 
 let scene, controls, camera, renderer;
 
@@ -54,7 +32,6 @@ function initScene() {
 
 function initCamera() {
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 500);
-    // camera.position.set(10, 10, 10);
     camera.position.set(1, 1, 1);
     camera.lookAt(0, 0, 0);
 };
@@ -86,6 +63,14 @@ function initLight() {
 
 function initControls() {
     controls = new OrbitControls(camera, renderer.domElement);
+    // 设置控制阻尼
+    controls.enableDamping = true;
+    // 设置自动旋转
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.2;
+    controls.maxPolarAngle = (Math.PI / 4) * 3;
+    controls.minPolarAngle = (Math.PI / 4) * 3;
+
 };
 
 function initContent() {
@@ -95,6 +80,8 @@ function initContent() {
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
         side: THREE.DoubleSide,
+        // uniforms: {}
+        transparent: true,
     });
 
 
@@ -112,25 +99,46 @@ function initContent() {
     let lightBox = null;
     gltfLoader.load('model/flyLight.glb', (gltf) => {
         // gltf.scene.scale.set(0.2, 0.2, 0.2);
-        console.log('gltf.scene.children[1]:', gltf.scene.children[1]);
+        // console.log('gltf.scene.children[1]:', gltf.scene.children[1]);
 
         lightBox = gltf.scene.children[1];
         lightBox.material = shaderMaterial;
-
-        // 克隆
+        // 克隆生成150个
         for (let i = 0; i < 150; i++) {
             let flyLight = gltf.scene.clone(true);
             let x = (Math.random() - 0.5) * 300;
-            let y = Math.random() * 60 + 25;
+            let y = Math.random() * 60 + 5;
             let z = (Math.random() - 0.5) * 300;
-
             flyLight.position.set(x, y, z);
+
+
+            gsap.to(flyLight.rotation, {
+                y: 2 * Math.PI,
+                duration: 10 + Math.random() * 30,
+                repeat: -1,
+            });
+            gsap.to(flyLight.position, {
+                x: '+=' + Math.random() * 5,
+                y: '+=' + Math.random() * 20,
+                yoyo: true,
+                duration: 5 + Math.random() * 10,
+                repeat: -1
+            })
+
             scene.add(flyLight);
+
+
         }
 
 
 
-    });
+
+    })
+
+
+
+
+
 
 };
 
