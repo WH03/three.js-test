@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #000000;
+            margin: 0px;
+            overflow: hidden;
+            background-image: radial-gradient(ellipse farthest-corner at center top,
+                    #23233f 0%,
+                    #000000 60%);
+        }
+    </style>
+</head>
+
+<body>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three":"../three.js-dev150/build/three.module.js",
+                "three/addons/": "../three.js-dev150/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from "three";
+        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+        const { scene, camera, renderer } = initScene();
+
+        let pointScene = null;
+        const total = 1000;
+        const height = 160;
+        const width = 160;
+        const depth = 160;
+
+        (function () {
+            creartStarPoints();
+            render();
+        })();
+
+        function creartStarPoints() {
+            const geometry = new THREE.BoxGeometry();
+            for (let i = 0; i < total; i++) {
+                const vertex = new THREE.Vector3();
+                const x = Math.random() * width - width * 0.5;
+                const y = Math.random() * height - height * 0.5;
+                const z = Math.random() * depth - depth * 0.5;
+
+                vertex.x = x;
+                vertex.y = y;
+                vertex.z = z;
+
+                vertex.origin = new THREE.Vector3();
+                vertex.origin.x = x;
+                vertex.origin.y = y;
+                vertex.origin.z = z;
+
+                vertex.direction = new THREE.Vector3();
+                vertex.direction.x = Math.random() - 0.5;
+                vertex.direction.y = Math.random() - 0.5;
+                vertex.direction.z = Math.random() - 0.5;
+                geometry.vertices.push(vertex);
+            }
+
+            const material = new THREE.PointsMaterial({
+                size: 0.2,
+                color: 0x00ffff,
+                fog: true,
+            });
+            const points = new THREE.Points(geometry, material);
+            pointScene = points;
+            scene.add(points);
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+            pointScene.geometry.vertices.forEach((item) => {
+                item.x -= item.direction.x * 0.2;
+                item.y -= item.direction.y * 0.2;
+                item.z -= item.direction.z * 0.2;
+                if (item.x > width || item.x < -width) item.x = item.origin.x;
+                if (item.y > width || item.y < -width) item.y = item.origin.y;
+                if (item.z > width || item.z < -width) item.z = item.origin.z;
+            });
+            pointScene.geometry.verticesNeedUpdate = true;
+            requestAnimationFrame(render);
+        }
+
+        function initScene() {
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x23233f, 1, 300000);
+
+            const camera = new THREE.PerspectiveCamera(
+                70,
+                window.innerWidth / window.innerHeight,
+                1,
+                100000
+            );
+            camera.position.set(50, 50, 50);
+            const renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+            });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            scene.add(new THREE.AxesHelper(100));
+            window.onresize = () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            };
+            return {
+                scene,
+                camera,
+                renderer,
+            };
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,154 @@
+<!-- 以下是一个简单的利用three.js实现太阳高仿效果图的代码，包括光球层、太阳黑子、日冕等，你可以将它复制到一个html文件中，通过浏览器查看。 -->
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Sun</title>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> -->
+    <!-- <script src="./three.js/build/three.min.js"></script> -->
+    <script src="../three.js-dev-143/build/three.js"></script>
+</head>
+
+<body>
+    <script>
+        // 初始化场景
+        var scene = new THREE.Scene();
+
+        // 初始化相机
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+        camera.position.z = 50;
+
+        // 初始化渲染器
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+
+
+        // 加载纹理
+        var texture = new THREE.TextureLoader().load('images/太阳.jpg');
+
+        console.log(texture);
+
+        // 定义uniform变量
+        const uniforms = {
+            color: { value: new THREE.Color(0xffffff) },
+            size: { value: 0.006 },
+            texture: { value: texture },
+        };
+        // 定义着色器
+        var vertexShader = `
+				varying vec2 vUv;
+				void main() {
+					vUv = uv;
+					vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+					gl_Position = projectionMatrix * modelViewPosition;
+				}`;
+        var fragmentShader = `
+				varying vec2 vUv;
+				uniform vec3 color;
+				uniform float size;
+				uniform sampler2D texture;
+				void main(){
+					vec4 diffuseColor = texture2D( texture, vUv);
+					if(diffuseColor.r < 0.5){
+						discard;
+					};
+					vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+					gl_PointSize = size * ( 300.0 / length( mvPosition.xyz ) );
+					gl_FragColor = vec4( color, mixtureOfGaussians(length(vUv-0.5)).x * 1.2 );
+				}`;
+        // 定义光球层材质
+        var material = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true
+        });
+
+        // 创建光球层
+        var geometry0 = new THREE.SphereGeometry(10, 32, 32);
+        var mesh0 = new THREE.Points(geometry0, material);
+        scene.add(mesh0);
+
+        // 定义黑子材质
+        var material1 = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true
+        });
+
+        // 创建黑子
+        var geometry1 = new THREE.SphereGeometry(1, 1, 1);
+        var mesh1 = new THREE.Points(geometry1, material1);
+        mesh1.position.set(-7, 8, 2);
+        scene.add(mesh1);
+
+        // 定义日冕材质
+        var material2 = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true
+        });
+
+        // 创建日冕
+        var geometry2 = new THREE.SphereGeometry(12, 32, 32);
+        var mesh2 = new THREE.Points(geometry2, material2);
+        scene.add(mesh2);
+
+        // 渲染场景
+        var animate = function () {
+            requestAnimationFrame(animate);
+            mesh0.rotation.y += 0.002;
+            mesh1.rotation.x += 0.005;
+            mesh2.rotation.z += 0.01;
+            renderer.render(scene, camera);
+        };
+
+        animate();
+
+        // 定义高斯函数
+        function mixtureOfGaussians(x) {
+            const sigma1 = 0.08;
+            const amplitude1 = 0.44;
+            const sigma2 = 0.05;
+            const amplitude2 = 0.21;
+            const sigma3 = 0.025;
+            const amplitude3 = 0.10;
+            const sigma4 = 0.015;
+            const amplitude4 = 0.052;
+            const sigma5 = 0.01;
+            const amplitude5 = 0.02;
+            const sigma6 = 0.008;
+            const amplitude6 = 0.014;
+            const sigma7 = 0.005;
+            const amplitude7 = 0.009;
+            const sigma8 = 0.003;
+            const amplitude8 = 0.005;
+
+            const gs1 = amplitude1 * Math.exp(-((x * x) / (2.0 * sigma1 * sigma1))) / (Math.sqrt(2.0 * Math.PI) * sigma1);
+            const gs2 = amplitude2 * Math.exp(-((x * x) / (2.0 * sigma2 * sigma2))) / (Math.sqrt(2.0 * Math.PI) * sigma2);
+            const gs3 = amplitude3 * Math.exp(-((x * x) / (2.0 * sigma3 * sigma3))) / (Math.sqrt(2.0 * Math.PI) * sigma3);
+            const gs4 = amplitude4 * Math.exp(-((x * x) / (2.0 * sigma4 * sigma4))) / (Math.sqrt(2.0 * Math.PI) * sigma4);
+            const gs5 = amplitude5 * Math.exp(-((x * x) / (2.0 * sigma5 * sigma5))) / (Math.sqrt(2.0 * Math.PI) * sigma5);
+            const gs6 = amplitude6 * Math.exp(-((x * x) / (2.0 * sigma6 * sigma6))) / (Math.sqrt(2.0 * Math.PI) * sigma6);
+            const gs7 = amplitude7 * Math.exp(-((x * x) / (2.0 * sigma7 * sigma7))) / (Math.sqrt(2.0 * Math.PI) * sigma7);
+            const gs8 = amplitude8 * Math.exp(-((x * x) / (2.0 * sigma8 * sigma8))) / (Math.sqrt(2.0 * Math.PI) * sigma8);
+
+            return vec4(gs1 + gs2 + gs3 + gs4 + gs5 + gs6 + gs7 + gs8, gs1 + gs2 + gs3 + gs4 + gs5 + gs6 + gs7, gs1 + gs2 + gs3 + gs4 + gs5 + gs6, 1.0);
+        }
+    </script>
+</body>
+
+</html>
