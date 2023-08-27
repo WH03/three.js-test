@@ -1,4 +1,4 @@
-let vertexShader = `
+// let vertexShader =/*glsl*/`
 	varying vec3 vColor;
 	// 接收传递的参数
 	uniform vec3 upColor;
